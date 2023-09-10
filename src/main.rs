@@ -1,7 +1,8 @@
-use crate::lexer::*;
 pub mod lexer;
-use crate::parser::*;
 pub mod parser;
+
+use crate::lexer::*;
+use crate::parser::*;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Token {
@@ -13,32 +14,21 @@ pub enum Token {
     CloseBracket,
     Number(i32),
 }
-#[derive(Debug, Clone)]
-struct Expr {
-    left: Element,
-    operator: String,
-    right: Element,
-}
-#[derive(Debug, Clone)]
-enum Element {
-    Expr(Box<Expr>),
-    Number(i32),
-}
+
 fn main() {
-    let tokens = create_tokens("12 * 2 + 3 / (4 - 1)");
-    println!("{:?}", tokens);
+    let input_data = "12 * 2 + 9 / (4 - 1)";
+    println!("{}", input_data);
 
-    parse_tokens(tokens);
+    match create_tokens(input_data) {
+        Ok(tokens) => {
+            println!("Tokens: {:?}", tokens);
 
-    // let mut expr = Expr {
-    //     left: Element::Number(12),
-    //     operator: "+".to_string(),
-    //     right: Element::Number(1),
-    // };
-    // let mut expr2 = Expr {
-    //     left: Element::Number(12),
-    //     operator: "+".to_string(),
-    //     right: Element::Expr(Box::new(expr)),
-    // };
-    // println!("{:#?}", expr2.clone());
+            let mut parser = Parser::new(tokens);
+            match parser.parse() {
+                Ok(result) => println!("Result: {}", result),
+                Err(err) => println!("Parsing Error: {}", err),
+            }
+        }
+        Err(err) => println!("Lexer Error: {}", err),
+    }
 }

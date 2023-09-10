@@ -1,13 +1,10 @@
 use crate::Token;
 
-pub fn create_tokens(s: &str) -> Vec<Token> {
-    println!("{}", s);
-
+pub fn create_tokens(s: &str) -> Result<Vec<Token>, &'static str> {
     let mut v = Vec::new();
     let mut cursor_pos = 0;
 
-    while cursor_pos < s.len() {
-        let chr = s.chars().nth(cursor_pos).unwrap_or_default();
+    while let Some(chr) = s.chars().nth(cursor_pos) {
         if chr != ' ' {
             let token = match chr as u8 {
                 40 => Token::OpenBracket,
@@ -18,9 +15,8 @@ pub fn create_tokens(s: &str) -> Vec<Token> {
                 47 => Token::Divide,
                 48..=57 => {
                     let mut num_str = String::from(chr);
-                    let num_range = 48..=57;
                     let mut next_ascii = s.chars().nth(cursor_pos + 1).unwrap_or_default();
-                    while num_range.contains(&(next_ascii as u8)) {
+                    while next_ascii.is_digit(10) {
                         num_str.push(next_ascii);
                         cursor_pos += 1;
                         next_ascii = s.chars().nth(cursor_pos + 1).unwrap_or_default();
@@ -28,13 +24,11 @@ pub fn create_tokens(s: &str) -> Vec<Token> {
                     let num: i32 = num_str.parse::<i32>().unwrap_or_default();
                     Token::Number(num)
                 }
-                _ => {
-                    panic!("unknown token")
-                }
+                _ => return Err("Detected unknown token"),
             };
             v.push(token);
         }
         cursor_pos += 1;
     }
-    v
+    Ok(v)
 }
